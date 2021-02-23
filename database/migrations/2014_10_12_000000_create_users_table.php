@@ -15,9 +15,12 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('dni')->unique();
+            $table->string('name', 50);
+            $table->string('surname', 50)->nullable();;
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('profession', 200)->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
@@ -31,6 +34,8 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
+    	DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         Schema::dropIfExists('users');
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
     }
 }

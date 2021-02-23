@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+
+    // protected $table = 'users'; // en caso de que el archivo no se llame igual que la tabla.
     use HasFactory, Notifiable;
 
     /**
@@ -40,4 +42,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    
+    public static function findByEmail($email) {
+    
+    	return User::where(compact('Email'))->first();
+    	// igual que
+    	// return static::where(compact('Email'))->first();
+    }
+    
+    public static function isAdmin() {
+    
+    	return $this::email === 'isabel@divercabodepalos.com';
+    }
 }

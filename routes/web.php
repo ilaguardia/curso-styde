@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\WelcomeUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +18,62 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Pruebas
+
+// Llamando al controlador
+Route::get('/usuarios',[UserController::class, 'index']);
+
+Route::get('/usuarios/{id}',[UserController::class, 'show'])
+	->where('id', '[0-9]+');
+	
+Route::get('/usuarios/nuevo',[UserController::class, 'create']);
+
+Route::get('/saludo/{name}/{nickname?}', WelcomeUserController::class); // Si solo tenemos una función la podemos poner como __invoke y la pilla por defecto. Entonces se usa esta forma
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Route::get('test',[TestController::class, 'test']);
+
+// Recoge cualquier ruta da igual la anidación
+Route::get('/usuarios/nuevo', function () {
+    return 'Alta usuario';
+});
+
+// Se pueden meter variables y validación de variables
+Route::get('/example1/{id}', function ($id) {
+    return 'usuarios '.$id;
+})->where('id', '[0-9]+'); // cualquier número de dígitos cada uno que sea del 0 al 9
+
+// Se pueden meter variables y validación de variables
+Route::get('/example1/user-{id}', function ($id) {
+    return 'user '.$id;
+})->where('id', '\d+'); // cualquier número de dígitos cada uno que sea del 0 al 9 (w es números + letras)
+
+
+Route::get('/example1', function () {
+    return 'usuarios';
+});
+
+Route::get('/saludo/{name}/{nickname?}', function ($name, $nickname = null) { //si lleva interrogación es opcional. Añadir valor por defecto
+    if ($nickname) {
+    return 'saludos '.$name. ' mas conocido por '. $nickname;
+    } else     return 'saludos '.$name;
+}); 
+
+
+*/
+
+
+
