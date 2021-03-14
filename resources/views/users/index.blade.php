@@ -10,7 +10,16 @@
 		@else
 			<ul>
 			@foreach ($users as $user)
-				<li>{{ $user->name }}, ({{ $user->email }})</li>
+                        
+                        <?php  /* 
+                         * <li><a href="{{ action([UserController::class, 'show'], ['id' => $user->id]) }}">{{ $user->name }}</a>, ({{ $user->email }})</li>
+                            Este no he conseguido que funcione
+                         *                          */
+                        ?>
+                        
+                        <li><a href="{{ url('/usuarios/'.$user->id) }}">{{ $user->name }}</a>, ({{ $user->email }} - {{ $user->profession->title }}) - 
+                         <a href="{{ route('users.show', ['user' => $user]) }}">{{ $user->name }}</a>, ({{ $user->email }})</li>
+                        
 			@endforeach
 			</ul>
 			

@@ -39,19 +39,42 @@ class UserController extends Controller
     	*/ 
     }
     
+    /* 
     public function show($id){
     	$title = 'Detalle del usuario';
 	$content = 'Detalle del usuario: '.$id;
 
-	$users = User::get('id', $id);
-
-	// dd(compact('title', 'id'));
-    
-    	return view('users.show', compact('title', 'content', 'id'));
-    	
-
+	// $users = User::get('id', $id);
+        
+        /*
+         * // Interesante para cuando quieres especificar una vista para un error determinado
+        $user = User::find($id);
+        
+        if ($user == null){
+            // return view('errors.404');
+            return response()->view('errors.404',[],404);
+        }
+         
+        return view('users.show', compact('title', 'user'));
+         * 
+         */
+        
+        /* 
+        // Versión 2 de lo mismo (si no encuentra el usuario da error directamente)
+        $user = User::findOrFail($id);
+        return view('users.show', compact('title', 'user'));
+         * 
+         */
+    /*
     	
     	//     	return 'Detalle del usuario: '.$id;
+    }
+    */ 
+    
+    public function show(User $user){
+    	$title = 'Detalle del usuario';
+	return view('users.show', compact('title', 'user'));
+        
     }
     
     public function create(){

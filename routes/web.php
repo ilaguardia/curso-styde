@@ -22,14 +22,25 @@ Route::get('/', function () {
 // Pruebas
 
 // Llamando al controlador
-Route::get('/usuarios',[UserController::class, 'index']);
+Route::get('/usuarios',[UserController::class, 'index'])
+        ->name("users");
 
+/* 
 Route::get('/usuarios/{id}',[UserController::class, 'show'])
-	->where('id', '[0-9]+');
-	
-Route::get('/usuarios/nuevo',[UserController::class, 'create']);
+	->where('id', '[0-9]+')
+        ->name("users.show");
+ * 
+ */
 
-Route::get('/saludo/{name}/{nickname?}', WelcomeUserController::class); // Si solo tenemos una función la podemos poner como __invoke y la pilla por defecto. Entonces se usa esta forma
+Route::get('/usuarios/{user}',[UserController::class, 'show'])
+        ->name("users.show");
+
+	
+Route::get('/usuarios/nuevo',[UserController::class, 'create'])
+        ->name("users.create");
+
+Route::get('/saludo/{name}/{nickname?}', WelcomeUserController::class)
+        ->name("welcome"); // Si solo tenemos una función la podemos poner como __invoke y la pilla por defecto. Entonces se usa esta forma
 
 
 

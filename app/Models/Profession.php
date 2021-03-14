@@ -10,4 +10,13 @@ class Profession extends Model
     use HasFactory;
     
     public $timestamps = false;
+    
+    protected $fillable = [
+        'title',
+    ];
+    
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }
