@@ -78,6 +78,21 @@ class UserController extends Controller
     }
     
     public function create(){
-    	return 'Create usuario nuevo';
+    	$title = 'Crear usuario';
+	return view('users.create');
     }
+    
+    public function store() {
+
+        $data = request()->all();
+
+        User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
+        ]);
+
+        return redirect()->route('users');
+    }
+
 }

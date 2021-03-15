@@ -16,6 +16,10 @@
         <a href ="{{ url()->previous() /* para volver a la página anterior vengas de donde vengas */ }}">Ver listado de usuarios</a>
         <a href ="{{ route('users') }}">Ver listado de usuarios</a>
         
+        <br />
+        
+        <a href ="{{ url('/usuarios/nuevo') }}">Crear usuario</a>
+        
         <?php  /* 
         <a href ="{{ 
             action([UserController::class, 'index']) /* llamando directamente al helper del controlador * / 

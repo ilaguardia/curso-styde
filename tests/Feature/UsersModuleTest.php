@@ -15,7 +15,7 @@ use Tests\TestCase;
 class UsersModuleTest extends TestCase
 {
     // **** Tarda un huevo, lo quito de momento. Volver a añadirlo al acabar de trastear con las pruebas
-    // use RefreshDatabase; //Recrea la bd con los migrations que existen. Si ha habido cambios los aplica.
+    use RefreshDatabase; //Recrea la bd con los migrations que existen. Si ha habido cambios los aplica.
     
 
 
@@ -125,12 +125,48 @@ class UsersModuleTest extends TestCase
     }
     
     /** @test */
-    public function users_new_page_loads()
+    public function it_loads_the_new_users_page()
     {
         $response = $this->get('/usuarios/nuevo');
 
         $response->assertStatus(200);
-        $response->assertSee('Create usuario nuevo', true);
+        $response->assertSee('Crear usuario nuevo', true);
+    }
+    
+    /** @test */
+    public function it_creates_a_new_user()
+    {
+        $this->withoutExceptionHandling();
+        
+        $this->post('/usuarios', [
+            'name' => 'Duilio',
+            'email' => 'duilio@email.com',
+
+            'password' => '1234'
+        ])->assertRedirect(route('users'));
+
+         $this->assertDatabaseHas('users', [
+            'name' => 'Duilio',
+            'email' => 'duilio@email.com',
+            // 'password' => '1234'
+        ]);
+        
+        /* // Para que no pete con la contraseña (que la encripta cada vez distinto, se usa el otro método
+         *  $this->assertDatabaseHas('users', [
+            'name' => 'Duilio',
+            'email' => 'duilio@email.com',
+            'password' => '1234'
+        ]); */
+        
+        // solo funciona con la tabla por defecto
+        $this->assertCredentials([
+            'name' => 'Duilio',
+            'email' => 'duilio@email.com',
+            'password' => '1234'
+        ]);
+        
+        
+        // $response->assertStatus(200);
     }
     
     

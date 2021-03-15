@@ -32,12 +32,14 @@ Route::get('/usuarios/{id}',[UserController::class, 'show'])
  * 
  */
 
-Route::get('/usuarios/{user}',[UserController::class, 'show'])
-        ->name("users.show");
-
-	
 Route::get('/usuarios/nuevo',[UserController::class, 'create'])
         ->name("users.create");
+
+Route::post('/usuarios',[UserController::class, 'store'])
+        ->name("users.store");
+
+Route::get('/usuarios/{user}',[UserController::class, 'show'])
+        ->name("users.show");
 
 Route::get('/saludo/{name}/{nickname?}', WelcomeUserController::class)
         ->name("welcome"); // Si solo tenemos una función la podemos poner como __invoke y la pilla por defecto. Entonces se usa esta forma
