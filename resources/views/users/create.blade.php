@@ -5,9 +5,20 @@
 @section('content')
 <main>
     <div class="col-md-7 col-lg-8">
-        <h1 class="mb-3">{{ $title ?? 'Titulo opcional si no llega variable' }} Crear usuario nuevo</h1>
+        @if ($errors->any()) 
+            <div class="alert danger">
+                <p> Hay errores. Corregir abajo </p>
+                  <ul>
+                  @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                  @endforeach
+                  </ul>
+                
+            </div>
+        @endif
+        <h1>{{ $title ?? 'Titulo opcional si no llega variable' }} Ficha de buceador</h1>
         <p class="lead">		
-        <form method="POST" action="{{ url('usuarios') }}">
+        <form method="POST" action="{{ url('usuarios') }}" class="needs-validation">
             <!-- /* Hay que añadir este token para que funcionen los formularios */ }} -->
             {!! csrf_field() !!} 
             <!-- /* Hay que añadir este token para que funcionen los formularios */ }} -->
@@ -17,55 +28,57 @@
             <div class="col-md-7 col-lg-8">
                 <div class="col-12">
                     <label for="firstName" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="firstName" placeholder="Nombre" required name="name">
-                    <div class="invalid-feedback">
-                        Este campo es obligatorio.
-                    </div>
+                    <input type="text" class="form-control @error('firstName') is-invalid @enderror" id="firstName" required placeholder="Nombre" name="name" value="{{ old('name') }}">
+                    @if ($errors->has('name')) <?php /* @if ($errors->first('name')) muestra solo el primero */ ?>
+                        <div class="text-danger">
+                            Este campo es obligatorio.
+                        </div>
+                    @endif
                 </div>
                 <div class="col-12">
                     <label for="lastName" class="form-label">Apellidos</label>
-                    <input type="text" class="form-control" id="lastName" placeholder="Apellidos" required name="surname">
-                    <div class="invalid-feedback">
-                        Este campo es obligatorio.
-                    </div>
+                    <input type="text" class="form-control @error('lastName') is-invalid @enderror" id="lastName" placeholder="Apellidos" required name="surname" value="{{ old('surname') }}">
+                    @error('lastName')
+                        <div class="text-danger">
+                            {{ $message }}
+                        </div>
+                    @enderror
                 </div>
                 <div class="col-12">
                     <label for="telephone" class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" id="telephone" placeholder="Teléfono" required name="telephone">
-                    <div class="invalid-feedback">
-                        Este campo es obligatorio.
-                    </div>
+                    <input type="text" class="form-control @error('telephone') is-invalid @enderror" id="telephone" placeholder="Teléfono" required name="telephone" value="{{ old('telephone') }}">
+                    @error('telephone')
+                        <div class="text-danger">
+                            {{ $message }}
+                        </div>
+                    @enderror
                 </div>
                 <div class="col-12">
                     <label for="email"  class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" placeholder="you@example.com" name="email">
+                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" placeholder="you@example.com" name="email" value="{{ old('email') }}">
+                    @if ($errors->has('email'))
+                        @error('email')
+                            <div class="text-danger">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    @else
                     <small id="emailHelp" class="form-text text-muted">Asegúrate que está bien escrito. :)</small>
-                    <div class="invalid-feedback">
-                        Por favor, introduce un email válido.
-                    </div>
+                    @endif
+                    
                 </div>
                 <div class="col-12">
                     <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="password" placeholder="" required name="password">
-                    <div class="invalid-feedback">
-                        Este campo es obligatorio.
-                    </div>
+                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" placeholder="" required name="password" value="{{ old('password') }}">
+                    @if ($errors->has('password'))
+                        @error('password')
+                        <div class="text-danger">
+                            {{ $message }}
+                        </div>
+                        @enderror
+                    @endif
                 </div>
-                <hr class="my-4">
-                <div class="col-12">
-                    <label for="dni" class="form-label">DNI/Pasaporte</label>
-                    <input type="text" class="form-control" id="dni" placeholder="DNI/Pasaporte" required name="dni">
-                    <div class="invalid-feedback">
-                        Este campo es obligatorio.
-                    </div>
-                </div>
-                <div class="col-12">
-                    <label for="birthdate" class="form-label">Fecha de nacimiento</label>
-                    <input type="text" class="form-control" id="birthdate" placeholder="Fecha de nacimiento" required name="birthdate">
-                    <div class="invalid-feedback">
-                        Este campo es obligatorio.
-                    </div>
-                </div>
+                
 
                 <hr class="my-4">
                 <button class="w-100 btn btn-primary btn-lg" type="submit">Crear usuario</button>
@@ -83,6 +96,24 @@
                 </div>
             </form>
         </div>
+        
+        
+        <hr class="my-4">
+                <div class="col-12">
+                    <label for="dni" class="form-label">DNI/Pasaporte</label>
+                    <input type="text" class="form-control" id="dni" placeholder="DNI/Pasaporte" required name="dni">
+                    <div class="invalid-feedback">
+                        Este campo es obligatorio.
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label for="birthdate" class="form-label">Fecha de nacimiento</label>
+                    <input type="text" class="form-control" id="birthdate" placeholder="Fecha de nacimiento" required name="birthdate">
+                    <div class="invalid-feedback">
+                        Este campo es obligatorio.
+                    </div>
+                </div>
+        
         <div class="col-md-7 col-lg-8">
             <h4 class="mb-3">Billing address</h4>
             <form class="needs-validation" novalidate>
@@ -241,5 +272,4 @@
 </main>
 
 <a href ="{{ url('/usuarios/') }}">Ver listado de usuarios</a>
-</p>
 @endsection

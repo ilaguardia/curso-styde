@@ -84,8 +84,35 @@ class UserController extends Controller
     
     public function store() {
 
-        $data = request()->all();
-
+        /* ESTE SISTEMA SERÍA PARA VALIDAR UNO A UNO CADA CAMPO
+         * 
+         * $data = request()->all();
+        
+        // Para controlar que no se da de alta un usuario sin los campos required
+        if (empty($data['name'])){
+            return redirect(route('users.create'))->withErrors([
+                "name" => 'Este campo es obligatorio',
+            ]);
+        } */
+        
+        // dd($data);
+        
+        
+        $data = request()->validate([
+            'name' => 'required',
+            // 'email' => 'required|email', // lo mismo que abajo. Pero la parte de unique da error
+            'email' => ['required','email', 'unique:users,email'], // unique: nombreTabla, nombreColumna -- Ver documentacion validaciones laravel
+            'password' => ['required', 'between:6,30'],
+        ],[
+            'name.required' => 'Este campo es obligatorio',
+            'email.required' => 'Este campo es obligatorio',
+            'email.unique' => 'Ya existe un usuario con ese email',
+            'password.required' => 'Este campo es obligatorio',
+            'password.between' => 'La contraseña debe tener al menos 6 dígitos',
+            
+        ]
+                );
+        
         User::create([
             'name' => $data['name'],
             'email' => $data['email'],

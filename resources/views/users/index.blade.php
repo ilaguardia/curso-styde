@@ -5,7 +5,7 @@
 @section('content')
     <h1 class="mt-5">Usuarios</h1>
     <p class="lead">
-        <a href ="{{ url('/usuarios/nuevo') }}">Crear usuario</a>
+        <a href ="{{ route('users.create') }}">Crear usuario</a>
     </p>
     <p class="lead">
         @if ($users->count() == 0 )
