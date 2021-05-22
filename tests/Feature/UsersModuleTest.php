@@ -157,7 +157,7 @@ class UsersModuleTest extends TestCase {
         DB::table('users')->truncate();
 
         // $this->withoutExceptionHandling();
-        
+
         $this->from(route('users.create'))
                 ->post('/usuarios', [
                     'name' => '',
@@ -168,27 +168,26 @@ class UsersModuleTest extends TestCase {
                 ->assertSessionHasErrors('name')
                 ->assertSessionHasErrors([
                     'name' => 'Este campo es obligatorio'
-                    ])
-                
-                /* ->assertSessionHasErrors([
-                    'name' => 'The name field is required.'
-                    ]) */ // Los mensajes error estándar están en resources/lang/en/validation.php
-                ;
+                ])
+
+        /* ->assertSessionHasErrors([
+          'name' => 'The name field is required.'
+          ]) */ // Los mensajes error estándar están en resources/lang/en/validation.php
+        ;
 
         // Comprueba que no se ha creado ese usuario
         $this->assertDatabaseMissing('users', [
             'email' => 'duilio@otroemail.com',
-        ])   ;
-        
+        ]);
+
         // Comprueba que no hay ningún usuario dado de alta
         $this->assertEquals(0, User::count());
-                
     }
-    
+
     /** @test */
     public function email_is_required_in_form_new_users() {
         // $this->withoutExceptionHandling();
-        
+
         $this->from(route('users.create'))
                 ->post('/usuarios', [
                     'name' => 'Duilio',
@@ -199,23 +198,22 @@ class UsersModuleTest extends TestCase {
                 ->assertSessionHasErrors('email')
                 ->assertSessionHasErrors([
                     'email' => 'Este campo es obligatorio'
-                    ])
-                ;
+                ])
+        ;
 
         // Comprueba que no se ha creado ese usuario
         $this->assertDatabaseMissing('users', [
             'name' => 'Duilio',
-        ])   ;
-        
+        ]);
+
         // Comprueba que no hay ningún usuario dado de alta
         $this->assertEquals(0, User::count());
-                
     }
-    
+
     /** @test */
     public function email_must_be_valid_in_form_new_users() {
         // $this->withoutExceptionHandling();
-        
+
         $this->from(route('users.create'))
                 ->post('/usuarios', [
                     'name' => 'Duilio',
@@ -224,28 +222,27 @@ class UsersModuleTest extends TestCase {
                 ])
                 ->assertRedirect(route('users.create'))
                 ->assertSessionHasErrors('email')
-                /*->assertSessionHasErrors([
-                    'email' => 'Este campo es obligatorio'
-                    ]) */ // Mirar mensajes de error para esto
-                ;
+        /* ->assertSessionHasErrors([
+          'email' => 'Este campo es obligatorio'
+          ]) */ // Mirar mensajes de error para esto
+        ;
 
         // Comprueba que no se ha creado ese usuario
         $this->assertDatabaseMissing('users', [
             'name' => 'Duilio',
-        ])   ;
-                
+        ]);
     }
-    
+
     /** @test */
     public function email_must_be_unique_in_form_new_users() {
         DB::table('users')->truncate();
 
         // $this->withoutExceptionHandling();
-        
+
         User::factory()->create([
-            'email'=>'duilio@styde.net',
+            'email' => 'duilio@styde.net',
         ]);
-        
+
         $this->from(route('users.create'))
                 ->post('/usuarios', [
                     'name' => 'Duilio',
@@ -255,24 +252,23 @@ class UsersModuleTest extends TestCase {
                 ->assertRedirect(route('users.create'))
                 ->assertSessionHasErrors('email')
                 ->assertSessionHasErrors([
-                    'email' => 'Este email ya tiene cuenta asociada'
-                    ])
-                ;
+                    'email' => 'Ya existe un usuario con ese email'
+                ])
+        ;
 
         // Comprueba que se ha creado ese usuario
         $this->assertDatabaseHas('users', [
             'email' => 'duilio@styde.net',
-        ])   ;
-        
+        ]);
+
         // Comprueba que solo hay un usuario dado de alta
         $this->assertEquals(1, User::count());
-                
     }
-    
+
     /** @test */
     public function password_is_required_in_form_new_users() {
         // $this->withoutExceptionHandling();
-        
+
         $this->from(route('users.create'))
                 ->post('/usuarios', [
                     'name' => 'Duilio',
@@ -283,16 +279,34 @@ class UsersModuleTest extends TestCase {
                 ->assertSessionHasErrors('password')
                 ->assertSessionHasErrors([
                     'password' => 'Este campo es obligatorio'
-                    ]);
+        ]);
 
         // Comprueba que no se ha creado ese usuario
         $this->assertDatabaseMissing('users', [
             'name' => 'Duilio',
-        ])   ;
-        
+        ]);
+
         // Comprueba que no hay ningún usuario dado de alta
         // $this->assertEquals(0, User::count());
-                
+    }
+
+    /** @test */
+    public function it_loads_the_edit_users_page() {
+
+        $this->withoutExceptionHandling(); // para desactivar el control de errores y ver el error en el test
+
+        $user = User::factory()->create([
+            'email' => 'duilio@styde.net',
+        ]);
+
+        // $this->get('/usuarios/editar', ['id' => $user->id]) // Esto genera una url tal que: /usuarios/editar?id=12
+        $this->get("/usuarios/{$user->id}/editar") // Esto geneal una url tal que: /usuarios/12/editar
+                ->assertStatus(200)
+                ->assertSee('Editar usuario ' . $user->id, true)
+                ->assertViewHas('user', $user)
+                ->assertViewHas('user', function ($viewUser) use ($user) {      // si por alguna razón la assert de arriba no funcionara usaríamos esta. Pero parece que si funciona.
+                    return $viewUser->id === $user->id;
+                });
     }
 
 }
