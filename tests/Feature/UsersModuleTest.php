@@ -412,59 +412,36 @@ class UsersModuleTest extends TestCase {
 
     /** @test */
     public function email_must_be_unique_when_updating_the_user() {
-        self::markTestIncomplete();
-        return;
+        /* self::markTestIncomplete();
+        return; */
 
+        User::factory()->create([
+            'name' => 'Email must be unique',
+            'email' => 'email-must-be-unique@on-updating.net'
+        ]);
+        
         $user = User::factory()->create([
-            'name' => 'Nombre inicial email unique Updating User',
-            'email' => 'duilio@styde.net'
+            'name' => 'Anothe email unique',
+            'email' => 'another-email-unique@on-updating.net'
         ]);
 
         // $this->withoutExceptionHandling();
 
         $credentials = [
-            'name' => 'Nombre actualizado email unique Updating User',
-            'email' => 'duilio@styde.net',
-            'password' => '123456'
-        ];
-
-        $this->from(route('users.edit', ['user' => $user]))
-                ->put(route('users.update', ['user' => $user]), $credentials)
-                ->assertRedirect(route('users.edit', ['user' => $user])) // Comprueba si después del put hace bien la redirección
-                ->assertSessionHasErrors('name')
-                ->assertSessionHasErrors([
-                    'name' => 'Este campo es obligatorio'
-        ]);
-
-        $this->assertDatabaseMissing('users', $credentials); // Comprueba que un registro con los datos nuevos no existe
-    }
-
-    /** @test */
-    public function password_is_required_when_updating_the_user() {
-        $user = User::factory()->create([
-            'email' => 'password@isrequired.net',
-            'password' => 'passwordisrequired',
-        ]);
-
-        // $this->withoutExceptionHandling();
-
-        $credentials = [
-            'name' => 'Name',
-            'email' => 'password@isrequired.net',
+            'name' => 'Anothe email unique',
+            'email' => 'email-must-be-unique@on-updating.net',
             'password' => ''
         ];
 
         $this->from(route('users.edit', ['user' => $user]))
                 ->put(route('users.update', ['user' => $user]), $credentials)
                 ->assertRedirect(route('users.edit', ['user' => $user])) // Comprueba si después del put hace bien la redirección
-                ->assertSessionHasErrors('password')
-                ->assertSessionHasErrors([
-                    'password' => 'Este campo es obligatorio'
-        ]);
+                ->assertSessionHasErrors('email')
+                ;
 
-        $this->assertDatabaseMissing('users', $credentials); // Comprueba que un registro con los datos nuevos no existe
+        // $this->assertDatabaseMissing('users', $credentials); // Comprueba que un registro con los datos nuevos no existe
     }
-    
+
     /** @test */
     public function password_is_optional_when_updating_the_user() {
         $user = User::factory()->create([
@@ -494,6 +471,36 @@ class UsersModuleTest extends TestCase {
         ];
         
         $this->assertCredentials($credentials);
+    }
+    
+    /** @test */
+    public function users_email_can_stay_the_same_when_updating_the_user() {
+        $user = User::factory()->create([
+            'email' => 'email_is_the_same@updating.net',
+            'password' => bcrypt('clave_anterior'),
+        ]);
+
+        // $this->withoutExceptionHandling();
+
+        $credentials = [
+            'name' => 'Email is the same',
+            'email' => 'email_is_the_same@updating.net',
+            'password' => '12345678'
+        ];
+
+        $this->from(route('users.edit', ['user' => $user]))
+                ->put(route('users.update', ['user' => $user]), $credentials)
+                ->assertRedirect(route('users.show', ['user' => $user])) // Comprueba si después del put hace bien la redirección
+        ;
+
+        $this->assertDatabaseMissing('users', $credentials); // Comprueba que un registro con los datos nuevos no existe
+        
+        $credentials = [
+            'name' => 'Email is the same',
+            'email' => 'email_is_the_same@updating.net'
+        ];
+        
+        $this->assertDatabaseHas('users',$credentials);
     }
 
 }

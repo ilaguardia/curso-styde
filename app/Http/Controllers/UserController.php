@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller {
 
@@ -138,12 +139,12 @@ class UserController extends Controller {
         ]);
 
         /* $user = new User;
-        $data['name'] = $user->name = $request->name;
-        $data['email'] = $user->email = $request->email;
-        $user->password = bcrypt($request->password);
-        $user->remember_token = str_random(100);
-        $data['confirm_token'] = $user->confirm_token = str_random(100);
-        $user->save(); */
+          $data['name'] = $user->name = $request->name;
+          $data['email'] = $user->email = $request->email;
+          $user->password = bcrypt($request->password);
+          $user->remember_token = str_random(100);
+          $data['confirm_token'] = $user->confirm_token = str_random(100);
+          $user->save(); */
 
         Mail::send('mails.register', ['data' => $data], function ($mail) use ($data) {
             $mail->subject('Confirma tu cuenta');
@@ -161,44 +162,44 @@ class UserController extends Controller {
             'email',
             'password',
         ];
-        
+
         /* $fields = [
-            'prof_relation_id',
-            'first_visit_date',
-            'dni',
-            'name',
-            'surname',
-            'certification',
-            'birthdate',
-            'telephone',
-            'email', // unique: nombreTabla, nombreColumna -- Ver documentacion validaciones laravel
-            'job',
-            'address',
-            'cp',
-            'city',
-            'province',
-            'country',
-            'emergency_contact',
-            'emergency_telephone',
-            'known_by',
-            'certification',
-            'certifier',
-            'certification_id',
-            'dives',
-            'last_dive',
-            'insurance_company',
-            'insurance_end_date',
-            'read_risk',
-            'read_rental',
-            'mailing_list',
-            'allow_photos',
-            'friend_of',
-            'password',
-        ]; */
+          'prof_relation_id',
+          'first_visit_date',
+          'dni',
+          'name',
+          'surname',
+          'certification',
+          'birthdate',
+          'telephone',
+          'email', // unique: nombreTabla, nombreColumna -- Ver documentacion validaciones laravel
+          'job',
+          'address',
+          'cp',
+          'city',
+          'province',
+          'country',
+          'emergency_contact',
+          'emergency_telephone',
+          'known_by',
+          'certification',
+          'certifier',
+          'certification_id',
+          'dives',
+          'last_dive',
+          'insurance_company',
+          'insurance_end_date',
+          'read_risk',
+          'read_rental',
+          'mailing_list',
+          'allow_photos',
+          'friend_of',
+          'password',
+          ]; */
 
         return view('users.edit', compact('title', 'user', 'fields'));
     }
-    
+
     public function update(User $user) {
         $title = 'Update usuario ';
 
@@ -207,25 +208,39 @@ class UserController extends Controller {
             'email',
             'password',
         ];
-        
+
         // $data = request()->all(); // intentar no usar request()->all() puede ser peligroso
-        
+
         $data = request()->validate([
+          'name' => 'required',
+          'email' => ['required','email', 'unique:users,email,'.$user->id], // email unique excepto el id del registro que estamos editando
+          'password' => '', // ['required', 'between:6,30'], quitamos password en la validación
+          ], [
+          'name.required' => 'Este campo es obligatorio',
+          'email.required' => 'Este campo es obligatorio',
+          'email.unique' => 'Ya existe un usuario con ese email',
+          ]);
+
+        // Actualizado a laravel 8 (lo mismo de arriba) - mirarlo mas despacio porque no he conseguido que funcione
+
+        /* Validator::make($data, [
             'name' => 'required',
-            'email' => ['required', 'email'], // unique: nombreTabla, nombreColumna -- Ver documentacion validaciones laravel
-            'password' => '', // ['required', 'between:6,30'], quitamos password en la validación
+            'email' => [
+                'required',
+                Rule::unique('users')->ignore($user->id),
+            ],
                 ], [
             'name.required' => 'Este campo es obligatorio',
             'email.required' => 'Este campo es obligatorio',
             'email.unique' => 'Ya existe un usuario con ese email',
-        ]); 
-        
-        if ($data['password'] != null){
+        ]); */
+
+        if ($data['password'] != null) {
             $data['password'] = bcrypt($data['password']);
         } else {
             unset($data['password']);
         }
-        
+
         $user->update($data);
 
         // return redirect(route('users.show', $user->id));
