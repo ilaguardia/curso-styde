@@ -76,36 +76,8 @@ class UserController extends Controller {
         $title = 'Detalle del usuario';
 
         $fields = [
-            'prof_relation_id',
-            'first_visit_date',
-            'dni',
             'name',
-            'surname',
-            'certification',
-            'birthdate',
-            'telephone',
-            'email', // unique: nombreTabla, nombreColumna -- Ver documentacion validaciones laravel
-            'job',
-            'address',
-            'cp',
-            'city',
-            'province',
-            'country',
-            'emergency_contact',
-            'emergency_telephone',
-            'known_by',
-            'certification',
-            'certifier',
-            'certification_id',
-            'dives',
-            'last_dive',
-            'insurance_company',
-            'insurance_end_date',
-            'read_risk',
-            'read_rental',
-            'mailing_list',
-            'allow_photos',
-            'friend_of',
+            'email',
             'password',
         ];
 
@@ -148,14 +120,14 @@ class UserController extends Controller {
         $data = request()->validate([
             'name' => 'required',
             // 'email' => 'required|email', // lo mismo que abajo. Pero la parte de unique da error
-            'email' => ['required', 'email', 'unique:users,email'], // unique: nombreTabla, nombreColumna -- Ver documentacion validaciones laravel
+            'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'between:6,30'],
                 ], [
             'name.required' => 'Este campo es obligatorio',
             'email.required' => 'Este campo es obligatorio',
             'email.unique' => 'Ya existe un usuario con ese email',
             'password.required' => 'Este campo es obligatorio',
-            'password.between' => 'La contraseña debe tener al menos 6 dígitos',
+            'password.between' => 'La contraseña debe tener al menos 6 dígitos y menos de 30',
                 ]
         );
 
@@ -185,6 +157,12 @@ class UserController extends Controller {
         $title = 'Editar usuario ';
 
         $fields = [
+            'name',
+            'email',
+            'password',
+        ];
+        
+        /* $fields = [
             'prof_relation_id',
             'first_visit_date',
             'dni',
@@ -216,9 +194,42 @@ class UserController extends Controller {
             'allow_photos',
             'friend_of',
             'password',
-        ];
+        ]; */
 
         return view('users.edit', compact('title', 'user', 'fields'));
+    }
+    
+    public function update(User $user) {
+        $title = 'Update usuario ';
+
+        $fields = [
+            'name',
+            'email',
+            'password',
+        ];
+        
+        // $data = request()->all(); // intentar no usar request()->all() puede ser peligroso
+        
+        $data = request()->validate([
+            'name' => 'required',
+            'email' => ['required', 'email'], // unique: nombreTabla, nombreColumna -- Ver documentacion validaciones laravel
+            'password' => '', // ['required', 'between:6,30'], quitamos password en la validación
+                ], [
+            'name.required' => 'Este campo es obligatorio',
+            'email.required' => 'Este campo es obligatorio',
+            'email.unique' => 'Ya existe un usuario con ese email',
+        ]); 
+        
+        if ($data['password'] != null){
+            $data['password'] = bcrypt($data['password']);
+        } else {
+            unset($data['password']);
+        }
+        
+        $user->update($data);
+
+        // return redirect(route('users.show', $user->id));
+        return redirect()->route('users.show', ['user' => $user]); // lo mismo de arriba pero pasando el usuario en lugar del id
     }
 
 }

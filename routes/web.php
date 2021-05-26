@@ -49,6 +49,9 @@ Route::get('/usuarios/{user}/editar',[UserController::class, 'edit'])
 Route::get('/usuarios/{user}',[UserController::class, 'show'])
         ->name("users.show");
 
+Route::put('/usuarios/{user}',[UserController::class, 'update'])
+        ->name("users.update");
+
 /*Route::get('/gestion/usuarios/{id}',[UserController::class, 'show'])
 	->where('id', '[0-9]+')
         ->name("users.show"); */

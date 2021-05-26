@@ -121,12 +121,12 @@ class UsersModuleTest extends TestCase {
 
     /** @test */
     public function it_creates_a_new_user() {
-        $this->withoutExceptionHandling();
+        // $this->withoutExceptionHandling();
 
-        $this->post('/usuarios', [
+        $this->post(route('users.store'), [
             'name' => 'Duilio',
             'email' => 'duilio@email.com',
-            'password' => '1234'
+            'password' => '123456'
         ])->assertRedirect(route('users'));
 
         $this->assertDatabaseHas('users', [
@@ -146,7 +146,7 @@ class UsersModuleTest extends TestCase {
         $this->assertCredentials([
             'name' => 'Duilio',
             'email' => 'duilio@email.com',
-            'password' => '1234'
+            'password' => '123456'
         ]);
 
         // $response->assertStatus(200);
@@ -186,6 +186,12 @@ class UsersModuleTest extends TestCase {
 
     /** @test */
     public function email_is_required_in_form_new_users() {
+        if (DB::table('users')->count() > 0) {
+            DB::table('users')->truncate();
+
+            // dd($this);
+        }
+
         // $this->withoutExceptionHandling();
 
         $this->from(route('users.create'))
@@ -240,13 +246,13 @@ class UsersModuleTest extends TestCase {
         // $this->withoutExceptionHandling();
 
         User::factory()->create([
-            'email' => 'duilio@styde.net',
+            'email' => 'email-unique@new-users.net',
         ]);
 
         $this->from(route('users.create'))
                 ->post('/usuarios', [
                     'name' => 'Duilio',
-                    'email' => 'duilio@styde.net',
+                    'email' => 'email-unique@new-users.net',
                     'password' => '1234'
                 ])
                 ->assertRedirect(route('users.create'))
@@ -258,7 +264,7 @@ class UsersModuleTest extends TestCase {
 
         // Comprueba que se ha creado ese usuario
         $this->assertDatabaseHas('users', [
-            'email' => 'duilio@styde.net',
+            'email' => 'email-unique@new-users.net',
         ]);
 
         // Comprueba que solo hay un usuario dado de alta
@@ -293,7 +299,7 @@ class UsersModuleTest extends TestCase {
     /** @test */
     public function it_loads_the_edit_users_page() {
 
-        $this->withoutExceptionHandling(); // para desactivar el control de errores y ver el error en el test
+        // $this->withoutExceptionHandling(); // para desactivar el control de errores y ver el error en el test
 
         $user = User::factory()->create([
             'email' => 'duilio@styde.net',
@@ -307,6 +313,187 @@ class UsersModuleTest extends TestCase {
                 ->assertViewHas('user', function ($viewUser) use ($user) {      // si por alguna razón la assert de arriba no funcionara usaríamos esta. Pero parece que si funciona.
                     return $viewUser->id === $user->id;
                 });
+    }
+
+    /** @test */
+    public function it_updates_a_new_user() {
+        $user = User::factory()->create([
+            'email' => 'duilio@styde.net',
+        ]);
+
+        // $this->withoutExceptionHandling();
+
+        $credentials = [
+            'name' => 'Duilio',
+            'email' => 'duilio@email.com',
+            'password' => '123456'
+        ];
+
+        $this->put("/usuarios/{$user->id}", $credentials)
+                ->assertRedirect(route('users.show', ['user' => $user])); // Comprueba si después del put hace bien la redirección
+
+        $this->assertCredentials($credentials); // Comprueba si los nuevos campos están
+        // $response->assertStatus(200);
+    }
+
+    /** @test */
+    public function name_is_required_when_updating_a_user() {
+        $user = User::factory()->create([
+            'email' => 'name@isrequired.net',
+        ]);
+
+        // $this->withoutExceptionHandling();
+
+        $credentials = [
+            'name' => '',
+            'email' => 'name@email.com',
+            'password' => '123456'
+        ];
+
+        $this->from(route('users.edit', ['user' => $user]))
+                ->put(route('users.update', ['user' => $user]), $credentials)
+                ->assertRedirect(route('users.edit', ['user' => $user])) // Comprueba si después del put hace bien la redirección
+                ->assertSessionHasErrors('name')
+                ->assertSessionHasErrors([
+                    'name' => 'Este campo es obligatorio'
+        ]);
+
+        $this->assertDatabaseMissing('users', $credentials); // Comprueba que un registro con los datos nuevos no existe
+    }
+
+    /** @test */
+    public function email_is_required_when_updating_a_user() {
+        $user = User::factory()->create([
+            'email' => 'email@isrequired.net',
+        ]);
+
+        // $this->withoutExceptionHandling();
+
+        $credentials = [
+            'name' => 'Duilio',
+            'email' => '',
+            'password' => '123456'
+        ];
+
+        $this->from(route('users.edit', ['user' => $user]))
+                ->put(route('users.update', ['user' => $user]), $credentials)
+                ->assertRedirect(route('users.edit', ['user' => $user])) // Comprueba si después del put hace bien la redirección
+                ->assertSessionHasErrors('email')
+                ->assertSessionHasErrors([
+                    'email' => 'Este campo es obligatorio'
+        ]);
+
+    }
+
+    /** @test */
+    public function email_must_be_valid_when_updating_the_user() {
+        $user = User::factory()->create([
+            'name' => 'Nombre inicial email valid Updating User',
+        ]);
+
+        // $this->withoutExceptionHandling();
+
+        $credentials = [
+            'name' => 'Nombre actualizado email valid Updating User',
+            'email' => 'correo-no-valido',
+            'password' => '123456'
+        ];
+
+        $this->from(route('users.edit', ['user' => $user]))
+                ->put(route('users.update', ['user' => $user]), $credentials)
+                ->assertRedirect(route('users.edit', ['user' => $user])) // Comprueba si después del put hace bien la redirección
+                ->assertSessionHasErrors('email');
+        /*       ->assertSessionHasErrors([
+          'email' => 'Este campo es obligatorio'
+          ]); */
+
+        $this->assertDatabaseMissing('users', $credentials); // Comprueba que un registro con los datos nuevos no existe
+    }
+
+    /** @test */
+    public function email_must_be_unique_when_updating_the_user() {
+        self::markTestIncomplete();
+        return;
+
+        $user = User::factory()->create([
+            'name' => 'Nombre inicial email unique Updating User',
+            'email' => 'duilio@styde.net'
+        ]);
+
+        // $this->withoutExceptionHandling();
+
+        $credentials = [
+            'name' => 'Nombre actualizado email unique Updating User',
+            'email' => 'duilio@styde.net',
+            'password' => '123456'
+        ];
+
+        $this->from(route('users.edit', ['user' => $user]))
+                ->put(route('users.update', ['user' => $user]), $credentials)
+                ->assertRedirect(route('users.edit', ['user' => $user])) // Comprueba si después del put hace bien la redirección
+                ->assertSessionHasErrors('name')
+                ->assertSessionHasErrors([
+                    'name' => 'Este campo es obligatorio'
+        ]);
+
+        $this->assertDatabaseMissing('users', $credentials); // Comprueba que un registro con los datos nuevos no existe
+    }
+
+    /** @test */
+    public function password_is_required_when_updating_the_user() {
+        $user = User::factory()->create([
+            'email' => 'password@isrequired.net',
+            'password' => 'passwordisrequired',
+        ]);
+
+        // $this->withoutExceptionHandling();
+
+        $credentials = [
+            'name' => 'Name',
+            'email' => 'password@isrequired.net',
+            'password' => ''
+        ];
+
+        $this->from(route('users.edit', ['user' => $user]))
+                ->put(route('users.update', ['user' => $user]), $credentials)
+                ->assertRedirect(route('users.edit', ['user' => $user])) // Comprueba si después del put hace bien la redirección
+                ->assertSessionHasErrors('password')
+                ->assertSessionHasErrors([
+                    'password' => 'Este campo es obligatorio'
+        ]);
+
+        $this->assertDatabaseMissing('users', $credentials); // Comprueba que un registro con los datos nuevos no existe
+    }
+    
+    /** @test */
+    public function password_is_optional_when_updating_the_user() {
+        $user = User::factory()->create([
+            'email' => 'password@isoptional.net',
+            'password' => bcrypt('clave_anterior'),
+        ]);
+
+        // $this->withoutExceptionHandling();
+
+        $credentials = [
+            'name' => 'Password is optional',
+            'email' => 'password@isoptional.net',
+            'password' => ''
+        ];
+
+        $this->from(route('users.edit', ['user' => $user]))
+                ->put(route('users.update', ['user' => $user]), $credentials)
+                ->assertRedirect(route('users.show', ['user' => $user])) // Comprueba si después del put hace bien la redirección
+        ;
+
+        $this->assertDatabaseMissing('users', $credentials); // Comprueba que un registro con los datos nuevos no existe
+        
+        $credentials = [
+            'name' => 'Password is optional',
+            'email' => 'password@isoptional.net',
+            'password' => 'clave_anterior'
+        ];
+        
+        $this->assertCredentials($credentials);
     }
 
 }

@@ -118,11 +118,11 @@ class UserSeeder extends Seeder
         ]); */
         
         User::factory()->create();
-        User::factory()->count(5)->create([
+        User::factory()->count(1)->create([
         	'surname' => 'Laguardia',
         ]);
         
-        User::factory()->count(5)->create();
+        User::factory()->count(1)->create();
         
     }
 }
