@@ -17,6 +17,10 @@ class UserController extends Controller {
 
         $users = User::all()->sortByDesc("id");
 
+        foreach ($users as $user){
+            $user->dni = substr($user->dni, 0,3);
+        }
+        
         $title = 'Listado de Usuarios';
 
         // dd(compact('title', 'users'));
@@ -212,28 +216,28 @@ class UserController extends Controller {
         // $data = request()->all(); // intentar no usar request()->all() puede ser peligroso
 
         $data = request()->validate([
-          'name' => 'required',
-          'email' => ['required','email', 'unique:users,email,'.$user->id], // email unique excepto el id del registro que estamos editando
-          'password' => '', // ['required', 'between:6,30'], quitamos password en la validación
-          ], [
-          'name.required' => 'Este campo es obligatorio',
-          'email.required' => 'Este campo es obligatorio',
-          'email.unique' => 'Ya existe un usuario con ese email',
-          ]);
-
-        // Actualizado a laravel 8 (lo mismo de arriba) - mirarlo mas despacio porque no he conseguido que funcione
-
-        /* Validator::make($data, [
             'name' => 'required',
-            'email' => [
-                'required',
-                Rule::unique('users')->ignore($user->id),
-            ],
+            'email' => ['required', 'email', 'unique:users,email,' . $user->id], // email unique excepto el id del registro que estamos editando
+            'password' => '', // ['required', 'between:6,30'], quitamos password en la validación
                 ], [
             'name.required' => 'Este campo es obligatorio',
             'email.required' => 'Este campo es obligatorio',
             'email.unique' => 'Ya existe un usuario con ese email',
-        ]); */
+        ]);
+
+        // Actualizado a laravel 8 (lo mismo de arriba) - mirarlo mas despacio porque no he conseguido que funcione
+
+        /* Validator::make($data, [
+          'name' => 'required',
+          'email' => [
+          'required',
+          Rule::unique('users')->ignore($user->id),
+          ],
+          ], [
+          'name.required' => 'Este campo es obligatorio',
+          'email.required' => 'Este campo es obligatorio',
+          'email.unique' => 'Ya existe un usuario con ese email',
+          ]); */
 
         if ($data['password'] != null) {
             $data['password'] = bcrypt($data['password']);
